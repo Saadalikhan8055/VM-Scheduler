@@ -1,0 +1,5 @@
+Algorithm,Active PMs,Idle PMs,Total Energy (watts),Avg CPU Utilization,Avg Memory Utilization
+our_algorithm,601,99,67920.59,0.5246,0.4897
+round_robin,635,65,77616.36,0.7115,0.6632
+first_fit,635,65,77616.36,0.7115,0.6632
+best_fit,635,65,77611.71,0.7115,0.6632

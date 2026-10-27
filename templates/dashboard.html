@@ -1,0 +1,1037 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ML-Based VM Placement - Energy-Efficient Cloud Scheduling</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --bg: #0b141c;
+        --panel: #101e29;
+        --border: #22333f;
+        --text: #e7eef3;
+        --secondary: #8ca0af;
+        --accent: #2bc792;
+        --warning: #f2a93b;
+        --danger: #ff6b6b;
+        --idle: #5b6b76;
+      }
+
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: "Inter", sans-serif;
+        background: linear-gradient(180deg, #091118 0%, var(--bg) 100%);
+        color: var(--text);
+        min-height: 100vh;
+      }
+
+      .app {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 24px 24px 40px;
+      }
+
+      header {
+        margin-bottom: 20px;
+      }
+
+      .header-shell {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      h1 {
+        margin: 0;
+        font-family: "Space Grotesk", sans-serif;
+        font-size: 2rem;
+        letter-spacing: 0.02em;
+      }
+
+      .subtitle {
+        margin-top: 2px;
+        color: var(--secondary);
+        font-size: 0.98rem;
+        line-height: 1.55;
+      }
+
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 18px;
+      }
+
+      .animate-on-load {
+        animation: fadeUpIn 0.5s ease-out both;
+      }
+
+      .controls.animate-on-load {
+        animation-delay: 100ms;
+      }
+
+      .panel-terminal.animate-on-load {
+        animation-delay: 200ms;
+      }
+
+      .panel-pm.animate-on-load {
+        animation-delay: 300ms;
+      }
+
+      .script-btn {
+        border: 1px solid var(--border);
+        background: linear-gradient(135deg, #172633 0%, #111d28 100%);
+        color: var(--text);
+        padding: 10px 14px;
+        border-radius: 999px;
+        cursor: pointer;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.92rem;
+        transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease, opacity 0.16s ease;
+      }
+
+      .script-btn:hover:not(:disabled) {
+        transform: translateY(-1px) scale(1.02);
+        border-color: var(--accent);
+        box-shadow: 0 8px 20px rgba(43, 199, 146, 0.16);
+      }
+
+      .script-btn:disabled:not(.is-running) {
+        opacity: 0.62;
+        cursor: not-allowed;
+      }
+
+      .script-btn.is-running:disabled {
+        opacity: 1;
+        color: var(--accent);
+        border-color: var(--accent);
+        box-shadow: 0 0 0 0 rgba(43, 199, 146, 0.24);
+        animation: runningGlow 1.2s ease-in-out infinite;
+      }
+
+      .button-inner {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .spinner {
+        width: 10px;
+        height: 10px;
+        border: 2px solid rgba(255,255,255,0.2);
+        border-top-color: var(--warning);
+        border-radius: 50%;
+        display: none;
+      }
+
+      .script-btn.is-running .spinner {
+        display: inline-block;
+        animation: spin 0.8s linear infinite;
+      }
+
+      .dashboard-grid {
+        display: grid;
+        grid-template-columns: 1.2fr 0.8fr;
+        gap: 18px;
+        align-items: start;
+      }
+
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        box-shadow: 0 10px 32px rgba(0, 0, 0, 0.28);
+        overflow: hidden;
+      }
+
+      .panel-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 16px;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+      }
+
+      .panel-title {
+        font-family: "Space Grotesk", sans-serif;
+        font-size: 1rem;
+      }
+
+      .panel-subtitle {
+        color: var(--secondary);
+        font-size: 0.8rem;
+        margin-top: 2px;
+      }
+
+      .terminal-window {
+        background: #03080b;
+        padding: 14px;
+        min-height: 360px;
+        max-height: 460px;
+        overflow-y: auto;
+      }
+
+      .terminal-topbar {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+
+      .terminal-topbar span {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #4b5563;
+      }
+
+      .terminal-topbar span:first-child { background: #ff6b6b; }
+      .terminal-topbar span:nth-child(2) { background: #f2a93b; }
+      .terminal-topbar span:nth-child(3) { background: #2bc792; }
+
+      .terminal {
+        font-family: "JetBrains Mono", monospace;
+        color: #eaf7f2;
+        white-space: pre-wrap;
+        line-height: 1.5;
+        font-size: 0.92rem;
+      }
+
+      .terminal .line {
+        margin-bottom: 4px;
+        animation: lineAppear 0.16s ease-out both;
+        will-change: transform, opacity;
+      }
+      .terminal .line.error { color: var(--danger); }
+      .terminal .line.success { color: var(--accent); }
+      .terminal .line.warn { color: var(--warning); }
+
+      .pm-summary {
+        padding: 12px 16px 0;
+        color: var(--secondary);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.9rem;
+      }
+
+      .pm-grid {
+        display: grid;
+        grid-template-columns: repeat(35, minmax(0, 1fr));
+        gap: 4px;
+        padding: 14px 16px 16px;
+      }
+
+      .pm-cell {
+        aspect-ratio: 1;
+        border-radius: 3px;
+        background: var(--idle);
+        transition: background-color 0.4s ease;
+        border: 1px solid rgba(255,255,255,0.05);
+      }
+
+      .pm-cell.active {
+        background: var(--accent);
+      }
+
+      .pm-cell--changed {
+        animation: pmCellPulse 0.4s ease-out;
+      }
+
+      .results-section {
+        margin-top: 18px;
+      }
+
+      .comparison-section {
+        margin-top: 18px;
+        display: none;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.35s ease;
+      }
+
+      .comparison-section.is-visible {
+        display: block;
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .comparison-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+        padding: 12px;
+        align-items: start;
+      }
+
+      .comparison-card {
+        background: rgba(255,255,255,0.03);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 8px 8px 7px;
+        min-width: 0;
+      }
+
+      .comparison-card.featured {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 1px rgba(43, 199, 146, 0.2), 0 0 20px rgba(43, 199, 146, 0.14);
+      }
+
+      .comparison-title {
+        font-family: "Space Grotesk", sans-serif;
+        font-size: 0.9rem;
+        margin-bottom: 4px;
+      }
+
+      .comparison-readout {
+        font-family: "JetBrains Mono", monospace;
+        color: var(--secondary);
+        font-size: 0.68rem;
+        line-height: 1.35;
+        overflow-wrap: anywhere;
+      }
+
+      .comparison-mini-grid {
+        display: grid;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        gap: 1px;
+        margin-top: 6px;
+        width: min(100%, 150px);
+        max-width: 150px;
+      }
+
+      .comparison-cell {
+        aspect-ratio: 1;
+        border-radius: 1px;
+        background: var(--idle);
+        transition: background-color 0.35s ease;
+      }
+
+      .comparison-cell.active {
+        background: var(--accent);
+      }
+
+      .comparison-message {
+        padding: 16px;
+        color: var(--secondary);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.9rem;
+      }
+
+      .gallery {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 14px;
+        padding: 16px;
+      }
+
+      .gallery-item {
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 12px;
+        overflow: hidden;
+        animation: galleryReveal 0.3s ease-out both;
+      }
+
+      .gallery-item img {
+        display: block;
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+        background: #132130;
+        cursor: zoom-in;
+      }
+
+      .gallery-caption {
+        padding: 10px 12px;
+        color: var(--text);
+        font-size: 0.9rem;
+        word-break: break-word;
+      }
+
+      .empty-state {
+        padding: 18px;
+        color: var(--secondary);
+        font-family: "JetBrains Mono", monospace;
+      }
+
+      .lightbox {
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.85);
+        backdrop-filter: blur(3px);
+        z-index: 1000;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+        padding: 24px;
+      }
+
+      .lightbox.is-open {
+        display: flex;
+        opacity: 1;
+      }
+
+      .lightbox-content {
+        position: relative;
+        width: min(92vw, 1100px);
+        max-width: 1100px;
+        text-align: center;
+      }
+
+      .lightbox-image {
+        max-width: 85vw;
+        max-height: 80vh;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+        border-radius: 12px;
+        box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+        display: block;
+        margin: 0 auto;
+      }
+
+      .lightbox-caption {
+        margin-top: 12px;
+        color: var(--text);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.95rem;
+      }
+
+      .lightbox-close,
+      .lightbox-nav {
+        border: 1px solid rgba(255,255,255,0.15);
+        background: rgba(16, 30, 41, 0.95);
+        color: var(--text);
+        border-radius: 999px;
+        padding: 10px 14px;
+        cursor: pointer;
+        font-family: "JetBrains Mono", monospace;
+        transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+      }
+
+      .lightbox-close:hover:not(:disabled),
+      .lightbox-nav:hover:not(:disabled) {
+        color: var(--accent);
+        border-color: var(--accent);
+      }
+
+      .lightbox-close {
+        position: absolute;
+        top: -12px;
+        right: -12px;
+      }
+
+      .lightbox-nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+      }
+
+      .lightbox-nav.prev { left: -16px; }
+      .lightbox-nav.next { right: -16px; }
+
+      .lightbox-nav:disabled,
+      .lightbox-close:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+      }
+
+      @keyframes pulse {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(242,169,59,0.2); }
+        50% { box-shadow: 0 0 0 8px rgba(242,169,59,0); }
+      }
+
+      @keyframes fadeUpIn {
+        from {
+          opacity: 0;
+          transform: translateY(12px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes lineAppear {
+        from {
+          opacity: 0;
+          transform: translateX(-8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      @keyframes runningGlow {
+        0%, 100% {
+          box-shadow: 0 0 0 0 rgba(43, 199, 146, 0.24);
+        }
+        50% {
+          box-shadow: 0 0 0 8px rgba(43, 199, 146, 0);
+        }
+      }
+
+      @keyframes pmCellPulse {
+        0% {
+          box-shadow: inset 0 0 0 0 rgba(43, 199, 146, 0.35);
+          background-color: #3dc99b;
+        }
+        100% {
+          box-shadow: inset 0 0 0 0 rgba(43, 199, 146, 0);
+          background-color: var(--accent);
+        }
+      }
+
+      @keyframes galleryReveal {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .animate-on-load,
+        .script-btn,
+        .terminal .line,
+        .pm-cell--changed,
+        .gallery-item,
+        .lightbox {
+          animation: none !important;
+          transition-duration: 0.01ms !important;
+          transition-delay: 0s !important;
+        }
+      }
+
+      @media (max-width: 1024px) {
+        .dashboard-grid { grid-template-columns: 1fr; }
+      }
+
+      @media (max-width: 900px) {
+        .comparison-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 640px) {
+        .app { padding: 16px 16px 30px; }
+        .controls { gap: 10px; }
+        .script-btn { width: 100%; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <header class="header-shell animate-on-load">
+        <h1>ML-Based VM Placement - Energy-Efficient Cloud Scheduling</h1>
+        <div class="subtitle">Autoencoder + SVM classification driving a two-stage placement and consolidation scheduler - validated across 5 random seeds and 36 threshold configurations.</div>
+      </header>
+
+      <div class="controls animate-on-load">
+        <button class="script-btn" data-script="clustering"><span class="button-inner"><span class="spinner"></span><span class="btn-label">Run Clustering</span></span></button>
+        <button class="script-btn" data-script="preliminary_scheduling"><span class="button-inner"><span class="spinner"></span><span class="btn-label">Run Preliminary Scheduling</span></span></button>
+        <button class="script-btn" data-script="consolidation"><span class="button-inner"><span class="spinner"></span><span class="btn-label">Run Consolidation</span></span></button>
+        <button class="script-btn" data-script="full_comparison"><span class="button-inner"><span class="spinner"></span><span class="btn-label">Run Full Comparison</span></span></button>
+        <button class="script-btn" data-script="multiseed"><span class="button-inner"><span class="spinner"></span><span class="btn-label">Run Multi-Seed Validation</span></span></button>
+      </div>
+
+      <div class="dashboard-grid">
+        <section class="panel animate-on-load panel-terminal">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">Terminal Stream</div>
+              <div class="panel-subtitle">Live output from the selected script</div>
+            </div>
+          </div>
+          <div class="terminal-window">
+            <div class="terminal-topbar"><span></span><span></span><span></span></div>
+            <div id="terminal" class="terminal"></div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">PM Pool Status</div>
+              <div class="panel-subtitle">Animated PM availability from the running stream</div>
+            </div>
+          </div>
+          <div id="pmSummary" class="pm-summary">Active: 0 | Idle: 700</div>
+          <div id="pmGrid" class="pm-grid"></div>
+        </section>
+      </div>
+
+      <section id="comparisonSection" class="panel comparison-section">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">Algorithm Comparison - PM Pools</div>
+            <div class="panel-subtitle">Four algorithm-specific PM pools from the latest full comparison run</div>
+          </div>
+        </div>
+        <div id="comparisonMessage" class="comparison-message">Run Full Comparison to see this comparison</div>
+        <div id="comparisonGrid" class="comparison-grid"></div>
+      </section>
+
+      <section class="panel results-section">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">Results Gallery</div>
+            <div class="panel-subtitle">PNG outputs from the local results folder</div>
+          </div>
+        </div>
+        <div id="gallery" class="gallery"></div>
+      </section>
+    </div>
+
+    <div id="lightbox" class="lightbox" aria-hidden="true">
+      <div class="lightbox-content">
+        <button id="lightboxClose" class="lightbox-close" type="button" aria-label="Close">✕ Close</button>
+        <button id="lightboxPrev" class="lightbox-nav prev" type="button" aria-label="Previous">‹ Previous</button>
+        <img id="lightboxImage" class="lightbox-image" src="" alt="" />
+        <button id="lightboxNext" class="lightbox-nav next" type="button" aria-label="Next">Next ›</button>
+        <div id="lightboxCaption" class="lightbox-caption"></div>
+      </div>
+    </div>
+
+    <script>
+      const buttons = Array.from(document.querySelectorAll('.script-btn'));
+      const terminal = document.getElementById('terminal');
+      const gallery = document.getElementById('gallery');
+      const pmGrid = document.getElementById('pmGrid');
+      const pmSummary = document.getElementById('pmSummary');
+      const comparisonSection = document.getElementById('comparisonSection');
+      const comparisonGrid = document.getElementById('comparisonGrid');
+      const comparisonMessage = document.getElementById('comparisonMessage');
+      const lightbox = document.getElementById('lightbox');
+      const lightboxImage = document.getElementById('lightboxImage');
+      const lightboxCaption = document.getElementById('lightboxCaption');
+      const lightboxClose = document.getElementById('lightboxClose');
+      const lightboxPrev = document.getElementById('lightboxPrev');
+      const lightboxNext = document.getElementById('lightboxNext');
+      const totalPms = 700;
+      const pmCells = [];
+      let currentEventSource = null;
+      let activeRunButton = null;
+      let lastHeaderActiveIndex = null;
+      let lastHeaderIdleIndex = null;
+      let lastPmActiveCount = null;
+
+      function createPmGrid() {
+        pmGrid.innerHTML = '';
+        pmCells.length = 0;
+        for (let i = 0; i < totalPms; i += 1) {
+          const cell = document.createElement('div');
+          cell.className = 'pm-cell';
+          pmGrid.appendChild(cell);
+          pmCells.push(cell);
+        }
+        updatePmGrid(0);
+      }
+
+      function updatePmGrid(activeCount) {
+        const safeActive = Math.max(0, Math.min(totalPms, Number(activeCount) || 0));
+        const idleCount = totalPms - safeActive;
+        const changedIndices = [];
+
+        pmCells.forEach((cell, index) => {
+          const isActive = index < safeActive;
+          const wasActive = lastPmActiveCount !== null ? index < lastPmActiveCount : false;
+          if (isActive !== wasActive) {
+            changedIndices.push(index);
+          }
+          cell.classList.toggle('active', isActive);
+          cell.classList.toggle('idle', !isActive);
+        });
+
+        if (lastPmActiveCount !== null && changedIndices.length) {
+          changedIndices.forEach((index) => {
+            const cell = pmCells[index];
+            if (!cell) {
+              return;
+            }
+            cell.classList.remove('pm-cell--changed');
+            void cell.offsetWidth;
+            cell.classList.add('pm-cell--changed');
+            window.setTimeout(() => {
+              cell.classList.remove('pm-cell--changed');
+            }, 420);
+          });
+        }
+
+        lastPmActiveCount = safeActive;
+        pmSummary.textContent = `Active: ${safeActive} | Idle: ${idleCount}`;
+      }
+
+      function parsePmCountsFromLine(line) {
+        const trimmed = line.trim();
+        if (!trimmed) {
+          return null;
+        }
+
+        const explicitActiveMatch = trimmed.match(/\bactive\s*pms?\s*[:=]?\s*(\d+)/i);
+        const explicitIdleMatch = trimmed.match(/\bidle\s*pms?\s*[:=]?\s*(\d+)/i);
+
+        if (explicitActiveMatch || explicitIdleMatch) {
+          const active = explicitActiveMatch ? parseInt(explicitActiveMatch[1], 10) : null;
+          const idle = explicitIdleMatch ? parseInt(explicitIdleMatch[1], 10) : null;
+          if (active !== null || idle !== null) {
+            return { active, idle };
+          }
+        }
+
+        const hasHeaderWords = /active/i.test(trimmed) && /idle/i.test(trimmed) && /pms/i.test(trimmed);
+        if (hasHeaderWords) {
+          const tokens = trimmed.split(/\s+/);
+          const activeIndex = tokens.findIndex((token) => token.toLowerCase() === 'active');
+          const idleIndex = tokens.findIndex((token) => token.toLowerCase() === 'idle');
+          if (activeIndex !== -1 && idleIndex !== -1) {
+            lastHeaderActiveIndex = activeIndex;
+            lastHeaderIdleIndex = idleIndex;
+          }
+          return null;
+        }
+
+        if (lastHeaderActiveIndex !== null && lastHeaderIdleIndex !== null) {
+          const tokens = trimmed.split(/\s+/);
+          if (tokens.length > Math.max(lastHeaderActiveIndex, lastHeaderIdleIndex)) {
+            const activeValue = Number(tokens[lastHeaderActiveIndex]);
+            const idleValue = Number(tokens[lastHeaderIdleIndex]);
+            if (!Number.isNaN(activeValue) && !Number.isNaN(idleValue)) {
+              return { active: activeValue, idle: idleValue };
+            }
+          }
+        }
+
+        return null;
+      }
+
+      function applyPmCountsFromLine(line) {
+        const parsed = parsePmCountsFromLine(line);
+        if (!parsed) {
+          return;
+        }
+
+        const active = parsed.active !== null ? parsed.active : totalPms - parsed.idle;
+        const idle = parsed.idle !== null ? parsed.idle : totalPms - active;
+        if (active >= 0 && idle >= 0) {
+          updatePmGrid(active);
+        }
+      }
+
+      function appendTerminalLine(text, kind = '') {
+        const line = document.createElement('div');
+        line.className = `line ${kind}`.trim();
+        line.textContent = text;
+        terminal.appendChild(line);
+        terminal.scrollTop = terminal.scrollHeight;
+      }
+
+      function clearTerminal() {
+        terminal.innerHTML = '';
+      }
+
+      function setButtonsState(runningButton = null) {
+        buttons.forEach((button) => {
+          const isRunning = button === runningButton;
+          button.disabled = !!runningButton;
+          button.classList.toggle('is-running', isRunning);
+        });
+      }
+
+      function stopCurrentRun() {
+        if (currentEventSource) {
+          currentEventSource.close();
+          currentEventSource = null;
+        }
+      }
+
+      function formatCaption(filename) {
+        return filename
+          .replace(/\.png$/i, '')
+          .replace(/[_-]+/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim()
+          .replace(/\b\w/g, (char) => char.toUpperCase());
+      }
+
+      let galleryItems = [];
+
+      function openLightbox(index) {
+        if (!galleryItems.length || index < 0 || index >= galleryItems.length) {
+          return;
+        }
+
+        const filename = galleryItems[index];
+        lightboxImage.src = `/results/${encodeURIComponent(filename)}`;
+        lightboxImage.alt = filename;
+        lightboxCaption.textContent = formatCaption(filename);
+        lightbox.dataset.currentIndex = String(index);
+        lightboxPrev.disabled = index === 0;
+        lightboxNext.disabled = index === galleryItems.length - 1;
+        lightbox.classList.add('is-open');
+        lightbox.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeLightbox() {
+        lightbox.classList.remove('is-open');
+        lightbox.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+      }
+
+      function showAdjacentImage(direction) {
+        const currentIndex = Number(lightbox.dataset.currentIndex || '0');
+        const nextIndex = currentIndex + direction;
+        if (nextIndex < 0 || nextIndex >= galleryItems.length) {
+          return;
+        }
+        openLightbox(nextIndex);
+      }
+
+      function renderGallery(items) {
+        galleryItems = items;
+        gallery.innerHTML = '';
+        if (!galleryItems.length) {
+          gallery.innerHTML = '<div class="empty-state">No PNG results available yet.</div>';
+          return;
+        }
+
+        const preferred = [
+          'cluster_profile',
+          'cluster_sizes',
+          'autoencoder_training',
+          'confusion_matrix',
+          'experiment1_active_pms',
+          'experiment1_energy',
+          'experiment2_active_pms',
+          'experiment2_energy',
+          'multiseed_energy_reduction',
+          'sensitivity_heatmap',
+          'kmeans_k_selection',
+          'kmeans_silhouette'
+        ];
+
+        const sortedItems = [...galleryItems].sort((a, b) => {
+          const aIndex = preferred.findIndex((token) => a.toLowerCase().includes(token));
+          const bIndex = preferred.findIndex((token) => b.toLowerCase().includes(token));
+          if (aIndex === -1 && bIndex === -1) return a.localeCompare(b);
+          if (aIndex === -1) return 1;
+          if (bIndex === -1) return -1;
+          return aIndex - bIndex;
+        });
+
+        galleryItems = sortedItems;
+
+        sortedItems.forEach((filename, index) => {
+          const card = document.createElement('div');
+          card.className = 'gallery-item';
+          const staggerDelay = Math.min(index * 40, 800);
+          card.style.animationDelay = `${staggerDelay}ms`;
+
+          const img = document.createElement('img');
+          img.src = `/results/${encodeURIComponent(filename)}`;
+          img.alt = filename;
+          img.addEventListener('click', () => openLightbox(index));
+
+          const caption = document.createElement('div');
+          caption.className = 'gallery-caption';
+          caption.textContent = formatCaption(filename);
+
+          card.appendChild(img);
+          card.appendChild(caption);
+          gallery.appendChild(card);
+        });
+      }
+
+      async function loadResults() {
+        try {
+          const response = await fetch('/results-list');
+          const items = await response.json();
+          renderGallery(items);
+        } catch (error) {
+          gallery.innerHTML = '<div class="empty-state">Unable to load results.</div>';
+        }
+      }
+
+      function showComparisonMessage(message) {
+        comparisonMessage.textContent = message;
+        comparisonMessage.style.display = 'block';
+        comparisonGrid.innerHTML = '';
+        comparisonSection.style.display = 'block';
+        comparisonSection.style.visibility = 'visible';
+        comparisonSection.style.opacity = '1';
+        comparisonSection.classList.add('is-visible');
+      }
+
+      function renderComparison(data) {
+        if (data && data.error) {
+          showComparisonMessage('Run Full Comparison to see this comparison');
+          return;
+        }
+
+        comparisonMessage.style.display = 'none';
+        comparisonGrid.innerHTML = '';
+        comparisonSection.style.display = 'block';
+        comparisonSection.style.visibility = 'visible';
+        comparisonSection.style.opacity = '1';
+        comparisonSection.classList.add('is-visible');
+
+        const definitions = [
+          { key: 'our_algorithm', label: 'Our Algorithm', featured: true },
+          { key: 'round_robin', label: 'Round Robin', featured: false },
+          { key: 'first_fit', label: 'First Fit', featured: false },
+          { key: 'best_fit', label: 'Best Fit', featured: false }
+        ];
+
+        definitions.forEach((definition) => {
+          const item = data ? data[definition.key] : null;
+          const card = document.createElement('div');
+          card.className = `comparison-card${definition.featured ? ' featured' : ''}`;
+
+          const title = document.createElement('div');
+          title.className = 'comparison-title';
+          title.textContent = definition.label;
+
+          const readout = document.createElement('div');
+          readout.className = 'comparison-readout';
+          if (item) {
+            const total = item.active + item.idle;
+            readout.innerHTML = `Active: ${item.active} | Idle: ${item.idle}<br>Energy: ${Number(item.energy).toLocaleString(undefined, { maximumFractionDigits: 2 })} W`;
+            const miniGrid = document.createElement('div');
+            miniGrid.className = 'comparison-mini-grid';
+            const cellCount = 60;
+            const activeCells = Math.max(0, Math.min(cellCount, Math.round((item.active / Math.max(total, 1)) * cellCount)));
+            for (let i = 0; i < cellCount; i += 1) {
+              const cell = document.createElement('div');
+              cell.className = `comparison-cell${i < activeCells ? ' active' : ''}`;
+              miniGrid.appendChild(cell);
+            }
+            card.appendChild(title);
+            card.appendChild(readout);
+            card.appendChild(miniGrid);
+          } else {
+            readout.textContent = 'No data available';
+            card.appendChild(title);
+            card.appendChild(readout);
+          }
+
+          comparisonGrid.appendChild(card);
+        });
+      }
+
+      async function loadComparisonData() {
+        try {
+          const response = await fetch('/comparison-data');
+          const data = await response.json();
+          renderComparison(data);
+        } catch (error) {
+          showComparisonMessage('Run Full Comparison to see this comparison');
+        }
+      }
+
+      function startRun(scriptName, button) {
+        clearTerminal();
+        appendTerminalLine(`Starting ${scriptName}...`, 'warn');
+        stopCurrentRun();
+        setButtonsState(button);
+        activeRunButton = button;
+        if (scriptName === 'full_comparison') {
+          comparisonSection.style.display = 'block';
+          comparisonSection.style.visibility = 'visible';
+          comparisonSection.style.opacity = '1';
+          comparisonSection.classList.add('is-visible');
+          comparisonMessage.textContent = 'Loading comparison data...';
+          comparisonMessage.style.display = 'block';
+          comparisonGrid.innerHTML = '';
+        }
+        lastHeaderActiveIndex = null;
+        lastHeaderIdleIndex = null;
+
+        currentEventSource = new EventSource(`/run/${scriptName}`);
+        let finished = false;
+
+        currentEventSource.onmessage = (event) => {
+          const data = event.data;
+
+          if (data === '[DONE]') {
+            if (!finished) {
+              finished = true;
+              appendTerminalLine('Run complete.', 'success');
+              if (scriptName === 'full_comparison') {
+                loadComparisonData();
+              }
+              currentEventSource.close();
+              currentEventSource = null;
+              setButtonsState();
+              activeRunButton = null;
+            }
+            return;
+          }
+
+          if (data.startsWith('[ERROR]')) {
+            appendTerminalLine(data, 'error');
+          } else {
+            appendTerminalLine(data);
+          }
+
+          applyPmCountsFromLine(data);
+        };
+
+        currentEventSource.onerror = () => {
+          if (!finished) {
+            finished = true;
+            appendTerminalLine('Stream disconnected or script failed.', 'error');
+            currentEventSource.close();
+            currentEventSource = null;
+            setButtonsState();
+            activeRunButton = null;
+          }
+        };
+      }
+
+      buttons.forEach((button) => {
+        button.addEventListener('click', () => {
+          const scriptName = button.dataset.script;
+          startRun(scriptName, button);
+        });
+      });
+
+      lightboxClose.addEventListener('click', closeLightbox);
+      lightboxPrev.addEventListener('click', () => showAdjacentImage(-1));
+      lightboxNext.addEventListener('click', () => showAdjacentImage(1));
+      lightbox.addEventListener('click', (event) => {
+        if (event.target === lightbox) {
+          closeLightbox();
+        }
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (!lightbox.classList.contains('is-open')) {
+          return;
+        }
+        if (event.key === 'Escape') {
+          closeLightbox();
+        } else if (event.key === 'ArrowLeft') {
+          showAdjacentImage(-1);
+        } else if (event.key === 'ArrowRight') {
+          showAdjacentImage(1);
+        }
+      });
+
+      createPmGrid();
+      loadResults();
+    </script>
+  </body>
+</html>

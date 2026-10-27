@@ -1,0 +1,12 @@
+experiment,k,inertia,silhouette_score,latent_dim,final_loss,kernel,accuracy,f1_score
+kmeans_k_selection,2.0,1154.1430344840965,0.3104708664848948,,,,,
+kmeans_k_selection,3.0,926.2894200990097,0.25612305780848693,,,,,
+kmeans_k_selection,4.0,816.7465485858971,0.2648063495158593,,,,,
+kmeans_k_selection,5.0,737.0673743474598,0.25500920366573654,,,,,
+kmeans_k_selection,6.0,673.9284465398977,0.25310364727464296,,,,,
+autoencoder_latent_dim_comparison,,,,3.0,0.003829807508736849,,,
+autoencoder_latent_dim_comparison,,,,5.0,0.0011849155416712165,,,
+autoencoder_latent_dim_comparison,,,,8.0,9.537860023556277e-06,,,
+svm_kernel_comparison,,,,,,rbf,0.9838709677419355,0.983854931266178
+svm_kernel_comparison,,,,,,linear,0.9863523573200993,0.9863485351193616
+svm_kernel_comparison,,,,,,poly,0.9745657568238213,0.9745276457875366
