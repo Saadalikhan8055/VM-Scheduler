@@ -35,9 +35,7 @@
         padding: 24px 24px 40px;
       }
 
-      header {
-        margin-bottom: 20px;
-      }
+      header { margin-bottom: 20px; }
 
       .header-shell {
         display: flex;
@@ -66,21 +64,12 @@
         margin-bottom: 18px;
       }
 
-      .animate-on-load {
-        animation: fadeUpIn 0.5s ease-out both;
-      }
-
-      .controls.animate-on-load {
-        animation-delay: 100ms;
-      }
-
-      .panel-terminal.animate-on-load {
-        animation-delay: 200ms;
-      }
-
-      .panel-pm.animate-on-load {
-        animation-delay: 300ms;
-      }
+      .animate-on-load { animation: fadeUpIn 0.5s ease-out both; }
+      .controls.animate-on-load { animation-delay: 100ms; }
+      .advanced.animate-on-load { animation-delay: 150ms; }
+      .kpi-strip.animate-on-load { animation-delay: 200ms; }
+      .panel-terminal.animate-on-load { animation-delay: 250ms; }
+      .panel-pm.animate-on-load { animation-delay: 300ms; }
 
       .script-btn {
         border: 1px solid var(--border);
@@ -113,11 +102,7 @@
         animation: runningGlow 1.2s ease-in-out infinite;
       }
 
-      .button-inner {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-      }
+      .button-inner { display: inline-flex; align-items: center; gap: 8px; }
 
       .spinner {
         width: 10px;
@@ -131,6 +116,72 @@
       .script-btn.is-running .spinner {
         display: inline-block;
         animation: spin 0.8s linear infinite;
+      }
+
+      /* Advanced (retrain / long analyses) */
+      .advanced {
+        margin-bottom: 18px;
+        border: 1px dashed var(--border);
+        border-radius: 12px;
+        padding: 10px 14px;
+        background: rgba(255,255,255,0.015);
+      }
+      .advanced summary {
+        cursor: pointer;
+        color: var(--secondary);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.85rem;
+      }
+      .advanced .controls { margin: 12px 0 8px; }
+      .advanced-note {
+        margin: 0;
+        color: var(--secondary);
+        font-size: 0.82rem;
+        line-height: 1.5;
+      }
+
+      /* Headline numbers */
+      .kpi-strip {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+        gap: 12px;
+        margin-bottom: 18px;
+      }
+      .kpi-card {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 12px 14px;
+        min-width: 0;
+      }
+      .kpi-card.accent { border-color: rgba(43, 199, 146, 0.55); }
+      .kpi-label {
+        color: var(--secondary);
+        font-size: 0.74rem;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+      }
+      .kpi-value {
+        margin-top: 4px;
+        font-family: "Space Grotesk", sans-serif;
+        font-size: 1.45rem;
+        font-weight: 700;
+        overflow-wrap: anywhere;
+      }
+      .kpi-card.accent .kpi-value { color: var(--accent); }
+      .kpi-sub {
+        margin-top: 2px;
+        color: var(--secondary);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.72rem;
+        line-height: 1.4;
+      }
+      .kpi-empty {
+        grid-column: 1 / -1;
+        color: var(--secondary);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.85rem;
+        padding: 6px 2px;
       }
 
       .dashboard-grid {
@@ -152,20 +203,26 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
         padding: 14px 16px;
         border-bottom: 1px solid rgba(255,255,255,0.06);
       }
 
-      .panel-title {
-        font-family: "Space Grotesk", sans-serif;
-        font-size: 1rem;
-      }
+      .panel-title { font-family: "Space Grotesk", sans-serif; font-size: 1rem; }
+      .panel-subtitle { color: var(--secondary); font-size: 0.8rem; margin-top: 2px; }
 
-      .panel-subtitle {
+      .run-status {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.75rem;
         color: var(--secondary);
-        font-size: 0.8rem;
-        margin-top: 2px;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 4px 10px;
       }
+      .run-status.running { color: var(--warning); border-color: var(--warning); }
+      .run-status.done { color: var(--accent); border-color: var(--accent); }
+      .run-status.failed { color: var(--danger); border-color: var(--danger); }
 
       .terminal-window {
         background: #03080b;
@@ -175,19 +232,8 @@
         overflow-y: auto;
       }
 
-      .terminal-topbar {
-        display: flex;
-        gap: 8px;
-        margin-bottom: 10px;
-      }
-
-      .terminal-topbar span {
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        background: #4b5563;
-      }
-
+      .terminal-topbar { display: flex; gap: 8px; margin-bottom: 10px; }
+      .terminal-topbar span { width: 10px; height: 10px; border-radius: 50%; background: #4b5563; }
       .terminal-topbar span:first-child { background: #ff6b6b; }
       .terminal-topbar span:nth-child(2) { background: #f2a93b; }
       .terminal-topbar span:nth-child(3) { background: #2bc792; }
@@ -230,18 +276,30 @@
         transition: background-color 0.4s ease;
         border: 1px solid rgba(255,255,255,0.05);
       }
+      .pm-cell.active { background: var(--accent); }
+      .pm-cell--changed { animation: pmCellPulse 0.4s ease-out; }
 
-      .pm-cell.active {
+      /* Tabs (comparison and tables) */
+      .tab-bar { display: flex; flex-wrap: wrap; gap: 6px; }
+      .tab-btn {
+        border: 1px solid var(--border);
+        background: transparent;
+        color: var(--secondary);
+        border-radius: 999px;
+        padding: 6px 12px;
+        cursor: pointer;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.78rem;
+        transition: color 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+      }
+      .tab-btn:hover { color: var(--text); border-color: var(--accent); }
+      .tab-btn.is-active {
+        color: #04342c;
         background: var(--accent);
+        border-color: var(--accent);
       }
 
-      .pm-cell--changed {
-        animation: pmCellPulse 0.4s ease-out;
-      }
-
-      .results-section {
-        margin-top: 18px;
-      }
+      .results-section { margin-top: 18px; }
 
       .comparison-section {
         margin-top: 18px;
@@ -250,11 +308,14 @@
         visibility: hidden;
         transition: opacity 0.35s ease;
       }
+      .comparison-section.is-visible { display: block; opacity: 1; visibility: visible; }
 
-      .comparison-section.is-visible {
-        display: block;
-        opacity: 1;
-        visibility: visible;
+      .comparison-note {
+        margin: 0;
+        padding: 12px 16px 0;
+        color: var(--secondary);
+        font-size: 0.84rem;
+        line-height: 1.55;
       }
 
       .comparison-grid {
@@ -264,6 +325,7 @@
         padding: 12px;
         align-items: start;
       }
+      .comparison-grid.cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 
       .comparison-card {
         background: rgba(255,255,255,0.03);
@@ -272,17 +334,12 @@
         padding: 8px 8px 7px;
         min-width: 0;
       }
-
       .comparison-card.featured {
         border-color: var(--accent);
         box-shadow: 0 0 0 1px rgba(43, 199, 146, 0.2), 0 0 20px rgba(43, 199, 146, 0.14);
       }
 
-      .comparison-title {
-        font-family: "Space Grotesk", sans-serif;
-        font-size: 0.9rem;
-        margin-bottom: 4px;
-      }
+      .comparison-title { font-family: "Space Grotesk", sans-serif; font-size: 0.9rem; margin-bottom: 4px; }
 
       .comparison-readout {
         font-family: "JetBrains Mono", monospace;
@@ -290,6 +347,14 @@
         font-size: 0.68rem;
         line-height: 1.35;
         overflow-wrap: anywhere;
+      }
+
+      .comparison-big {
+        font-family: "Space Grotesk", sans-serif;
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--accent);
+        margin: 4px 0 2px;
       }
 
       .comparison-mini-grid {
@@ -300,17 +365,13 @@
         width: min(100%, 150px);
         max-width: 150px;
       }
-
       .comparison-cell {
         aspect-ratio: 1;
         border-radius: 1px;
         background: var(--idle);
         transition: background-color 0.35s ease;
       }
-
-      .comparison-cell.active {
-        background: var(--accent);
-      }
+      .comparison-cell.active { background: var(--accent); }
 
       .comparison-message {
         padding: 16px;
@@ -318,6 +379,44 @@
         font-family: "JetBrains Mono", monospace;
         font-size: 0.9rem;
       }
+
+      /* Result tables */
+      .tables-section { margin-top: 18px; }
+      .table-note {
+        margin: 0;
+        padding: 12px 16px 0;
+        color: var(--secondary);
+        font-size: 0.84rem;
+        line-height: 1.55;
+      }
+      .table-wrap {
+        margin: 12px 16px 16px;
+        max-height: 380px;
+        overflow: auto;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+      }
+      .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.78rem;
+      }
+      .data-table th, .data-table td {
+        padding: 8px 12px;
+        text-align: right;
+        white-space: nowrap;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+      }
+      .data-table th:first-child, .data-table td:first-child { text-align: left; }
+      .data-table th {
+        position: sticky;
+        top: 0;
+        background: #152634;
+        color: var(--secondary);
+        font-weight: 500;
+      }
+      .data-table tr:last-child td { border-bottom: none; }
 
       .gallery {
         display: grid;
@@ -350,11 +449,7 @@
         word-break: break-word;
       }
 
-      .empty-state {
-        padding: 18px;
-        color: var(--secondary);
-        font-family: "JetBrains Mono", monospace;
-      }
+      .empty-state { padding: 18px; color: var(--secondary); font-family: "JetBrains Mono", monospace; }
 
       .lightbox {
         position: fixed;
@@ -369,11 +464,7 @@
         transition: opacity 0.2s ease;
         padding: 24px;
       }
-
-      .lightbox.is-open {
-        display: flex;
-        opacity: 1;
-      }
+      .lightbox.is-open { display: flex; opacity: 1; }
 
       .lightbox-content {
         position: relative;
@@ -414,93 +505,37 @@
       }
 
       .lightbox-close:hover:not(:disabled),
-      .lightbox-nav:hover:not(:disabled) {
-        color: var(--accent);
-        border-color: var(--accent);
-      }
+      .lightbox-nav:hover:not(:disabled) { color: var(--accent); border-color: var(--accent); }
 
-      .lightbox-close {
-        position: absolute;
-        top: -12px;
-        right: -12px;
-      }
-
-      .lightbox-nav {
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-      }
-
+      .lightbox-close { position: absolute; top: -12px; right: -12px; }
+      .lightbox-nav { position: absolute; top: 50%; transform: translateY(-50%); }
       .lightbox-nav.prev { left: -16px; }
       .lightbox-nav.next { right: -16px; }
 
       .lightbox-nav:disabled,
-      .lightbox-close:disabled {
-        opacity: 0.35;
-        cursor: not-allowed;
-      }
-
-      @keyframes pulse {
-        0%, 100% { box-shadow: 0 0 0 0 rgba(242,169,59,0.2); }
-        50% { box-shadow: 0 0 0 8px rgba(242,169,59,0); }
-      }
+      .lightbox-close:disabled { opacity: 0.35; cursor: not-allowed; }
 
       @keyframes fadeUpIn {
-        from {
-          opacity: 0;
-          transform: translateY(12px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
+        from { opacity: 0; transform: translateY(12px); }
+        to { opacity: 1; transform: translateY(0); }
       }
-
       @keyframes lineAppear {
-        from {
-          opacity: 0;
-          transform: translateX(-8px);
-        }
-        to {
-          opacity: 1;
-          transform: translateX(0);
-        }
+        from { opacity: 0; transform: translateX(-8px); }
+        to { opacity: 1; transform: translateX(0); }
       }
-
       @keyframes runningGlow {
-        0%, 100% {
-          box-shadow: 0 0 0 0 rgba(43, 199, 146, 0.24);
-        }
-        50% {
-          box-shadow: 0 0 0 8px rgba(43, 199, 146, 0);
-        }
+        0%, 100% { box-shadow: 0 0 0 0 rgba(43, 199, 146, 0.24); }
+        50% { box-shadow: 0 0 0 8px rgba(43, 199, 146, 0); }
       }
-
       @keyframes pmCellPulse {
-        0% {
-          box-shadow: inset 0 0 0 0 rgba(43, 199, 146, 0.35);
-          background-color: #3dc99b;
-        }
-        100% {
-          box-shadow: inset 0 0 0 0 rgba(43, 199, 146, 0);
-          background-color: var(--accent);
-        }
+        0% { box-shadow: inset 0 0 0 0 rgba(43, 199, 146, 0.35); background-color: #3dc99b; }
+        100% { box-shadow: inset 0 0 0 0 rgba(43, 199, 146, 0); background-color: var(--accent); }
       }
-
       @keyframes galleryReveal {
-        from {
-          opacity: 0;
-          transform: translateY(10px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
       }
-
-      @keyframes spin {
-        to { transform: rotate(360deg); }
-      }
+      @keyframes spin { to { transform: rotate(360deg); } }
 
       @media (prefers-reduced-motion: reduce) {
         .animate-on-load,
@@ -518,13 +553,9 @@
       @media (max-width: 1024px) {
         .dashboard-grid { grid-template-columns: 1fr; }
       }
-
       @media (max-width: 900px) {
-        .comparison-grid {
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
+        .comparison-grid, .comparison-grid.cols-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       }
-
       @media (max-width: 640px) {
         .app { padding: 16px 16px 30px; }
         .controls { gap: 10px; }
@@ -547,6 +578,19 @@
         <button class="script-btn" data-script="multiseed"><span class="button-inner"><span class="spinner"></span><span class="btn-label">Run Multi-Seed Validation</span></span></button>
       </div>
 
+      <details class="advanced animate-on-load">
+        <summary>Advanced: retrain models and run long analyses</summary>
+        <div class="controls">
+          <button class="script-btn" data-script="autoencoder" data-confirm="Retraining the autoencoder overwrites models/encoder_model.keras and data/processed/latent_features.csv. The SVM must be retrained afterwards, or the saved SVM will no longer match. Continue?"><span class="button-inner"><span class="spinner"></span><span class="btn-label">Retrain Autoencoder</span></span></button>
+          <button class="script-btn" data-script="svm" data-confirm="Retraining the SVM overwrites models/svm_classifier.pkl and results/confusion_matrix.png. Continue?"><span class="button-inner"><span class="spinner"></span><span class="btn-label">Retrain SVM</span></span></button>
+          <button class="script-btn" data-script="sensitivity" data-confirm="The sensitivity analysis runs 36 combinations and takes a few minutes. Continue?"><span class="button-inner"><span class="spinner"></span><span class="btn-label">Run Sensitivity Analysis</span></span></button>
+          <button class="script-btn" data-script="hyperparameter" data-confirm="The hyperparameter study trains several models and takes a few minutes. Continue?"><span class="button-inner"><span class="spinner"></span><span class="btn-label">Run Hyperparameter Study</span></span></button>
+        </div>
+        <p class="advanced-note">Only one script runs at a time. Closing or refreshing this page stops the script that is running.</p>
+      </details>
+
+      <section id="kpiStrip" class="kpi-strip animate-on-load" aria-label="Headline numbers"></section>
+
       <div class="dashboard-grid">
         <section class="panel animate-on-load panel-terminal">
           <div class="panel-header">
@@ -554,6 +598,7 @@
               <div class="panel-title">Terminal Stream</div>
               <div class="panel-subtitle">Live output from the selected script</div>
             </div>
+            <span id="runStatus" class="run-status">Ready</span>
           </div>
           <div class="terminal-window">
             <div class="terminal-topbar"><span></span><span></span><span></span></div>
@@ -561,7 +606,7 @@
           </div>
         </section>
 
-        <section class="panel">
+        <section class="panel animate-on-load panel-pm">
           <div class="panel-header">
             <div>
               <div class="panel-title">PM Pool Status</div>
@@ -577,11 +622,34 @@
         <div class="panel-header">
           <div>
             <div class="panel-title">Algorithm Comparison - PM Pools</div>
-            <div class="panel-subtitle">Four algorithm-specific PM pools from the latest full comparison run</div>
+            <div class="panel-subtitle">Each view compares like with like: the same VMs in every panel</div>
+          </div>
+          <div class="tab-bar" id="comparisonTabs">
+            <button class="tab-btn is-active" type="button" data-view="consolidation">Consolidation effect</button>
+            <button class="tab-btn" type="button" data-view="placement">Placement only</button>
           </div>
         </div>
-        <div id="comparisonMessage" class="comparison-message">Run Full Comparison to see this comparison</div>
+        <p id="comparisonNote" class="comparison-note"></p>
+        <div id="comparisonMessage" class="comparison-message" style="display:none"></div>
         <div id="comparisonGrid" class="comparison-grid"></div>
+      </section>
+
+      <section class="panel tables-section">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">Result Tables</div>
+            <div class="panel-subtitle">The numbers behind the charts, read from the results folder</div>
+          </div>
+          <div class="tab-bar" id="tableTabs">
+            <button class="tab-btn is-active" type="button" data-table="placement">Placement</button>
+            <button class="tab-btn" type="button" data-table="consolidation">Consolidation</button>
+            <button class="tab-btn" type="button" data-table="multiseed">Multi-seed</button>
+            <button class="tab-btn" type="button" data-table="sensitivity">Sensitivity</button>
+            <button class="tab-btn" type="button" data-table="hyperparameters">Hyperparameters</button>
+          </div>
+        </div>
+        <p id="tableNote" class="table-note"></p>
+        <div id="tableWrap" class="table-wrap"></div>
       </section>
 
       <section class="panel results-section">
@@ -611,9 +679,16 @@
       const gallery = document.getElementById('gallery');
       const pmGrid = document.getElementById('pmGrid');
       const pmSummary = document.getElementById('pmSummary');
+      const runStatus = document.getElementById('runStatus');
+      const kpiStrip = document.getElementById('kpiStrip');
       const comparisonSection = document.getElementById('comparisonSection');
       const comparisonGrid = document.getElementById('comparisonGrid');
       const comparisonMessage = document.getElementById('comparisonMessage');
+      const comparisonNote = document.getElementById('comparisonNote');
+      const comparisonTabs = document.getElementById('comparisonTabs');
+      const tableTabs = document.getElementById('tableTabs');
+      const tableNote = document.getElementById('tableNote');
+      const tableWrap = document.getElementById('tableWrap');
       const lightbox = document.getElementById('lightbox');
       const lightboxImage = document.getElementById('lightboxImage');
       const lightboxCaption = document.getElementById('lightboxCaption');
@@ -623,11 +698,60 @@
       const totalPms = 700;
       const pmCells = [];
       let currentEventSource = null;
-      let activeRunButton = null;
-      let lastHeaderActiveIndex = null;
-      let lastHeaderIdleIndex = null;
       let lastPmActiveCount = null;
+      let galleryItems = [];
+      let imageVersion = Date.now();
+      let comparisonData = null;
+      let comparisonView = 'consolidation';
+      let currentTable = 'placement';
 
+      const SCRIPT_LABELS = {
+        clustering: 'Clustering',
+        preliminary_scheduling: 'Preliminary Scheduling',
+        consolidation: 'Consolidation',
+        full_comparison: 'Full Comparison',
+        multiseed: 'Multi-Seed Validation',
+        autoencoder: 'Autoencoder training',
+        svm: 'SVM training',
+        sensitivity: 'Sensitivity Analysis',
+        hyperparameter: 'Hyperparameter Study'
+      };
+
+      const TABLE_NOTES = {
+        placement: 'Experiment 1. All four algorithms place the same 8,059 VMs on the same 700 PMs, with no churn and no consolidation.',
+        consolidation: 'Experiment 2. Both rows contain the same VMs (after 30% random churn). The second row is after consolidation.',
+        multiseed: "One row per random seed (a different set of VMs departs). 'Total' reduction compares the state before churn with the state after consolidation, so it includes energy saved because VMs left. 'Consolidation-only' compares the same VMs before and after consolidation. The std row is the population standard deviation.",
+        sensitivity: 'Consolidation-only reduction (compared with the state before consolidation), seed 42. The upper threshold barely matters because no PM gets near it after churn.',
+        hyperparameters: 'Checks on the choice of k for K-Means, the autoencoder latent size, and the SVM kernel.'
+      };
+
+      const COMPARISON_NOTES = {
+        consolidation: 'Our algorithm, before and after the consolidation stage. Both states contain the same VMs (after 30% random churn), so the difference comes from consolidation alone. Energy is estimated from a SPECpower table.',
+        placement: 'All four algorithms place the same 8,059 VMs on the same 700 PMs, with no consolidation. Least-loaded-first spreads load, so it activates more PMs than the bin-packing baselines. Packing VMs onto fewer PMs is the job of the consolidation stage.'
+      };
+
+      /* ---------- formatting helpers ---------- */
+      function fmtNumber(value, decimals) {
+        if (value === null || value === undefined || Number.isNaN(Number(value))) return 'n/a';
+        return Number(value).toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+      }
+
+      function formatCaption(filename) {
+        return filename
+          .replace(/\.png$/i, '')
+          .replace(/[_-]+/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim()
+          .replace(/\b\w/g, (char) => char.toUpperCase());
+      }
+
+      function formatCell(value) {
+        const text = String(value).trim();
+        if (/^-?\d+\.\d{5,}$/.test(text)) return String(Number(text).toFixed(4)).replace(/0+$/, '').replace(/\.$/, '');
+        return text;
+      }
+
+      /* ---------- PM grid ---------- */
       function createPmGrid() {
         pmGrid.innerHTML = '';
         pmCells.length = 0;
@@ -648,9 +772,7 @@
         pmCells.forEach((cell, index) => {
           const isActive = index < safeActive;
           const wasActive = lastPmActiveCount !== null ? index < lastPmActiveCount : false;
-          if (isActive !== wasActive) {
-            changedIndices.push(index);
-          }
+          if (isActive !== wasActive) changedIndices.push(index);
           cell.classList.toggle('active', isActive);
           cell.classList.toggle('idle', !isActive);
         });
@@ -658,15 +780,11 @@
         if (lastPmActiveCount !== null && changedIndices.length) {
           changedIndices.forEach((index) => {
             const cell = pmCells[index];
-            if (!cell) {
-              return;
-            }
+            if (!cell) return;
             cell.classList.remove('pm-cell--changed');
             void cell.offsetWidth;
             cell.classList.add('pm-cell--changed');
-            window.setTimeout(() => {
-              cell.classList.remove('pm-cell--changed');
-            }, 420);
+            window.setTimeout(() => cell.classList.remove('pm-cell--changed'), 420);
           });
         }
 
@@ -674,62 +792,64 @@
         pmSummary.textContent = `Active: ${safeActive} | Idle: ${idleCount}`;
       }
 
+      // --- PM parser start (kept self-contained so it can be tested on its own)
+      let tableMode = false;
+      const RE_PAIR = /(\d+)\s+active\s+pms?,?\s+(\d+)\s+idle\s+pms?/i;
+      const RE_ACTIVE = /\bactive\s*pms?\s*[:=]?\s*(\d+)/i;
+      const RE_IDLE = /\bidle\s*pms?\s*[:=]?\s*(\d+)/i;
+      const RE_TABLE_HEADER = /active\s+pms\s+idle\s+pms/i;
+      const RE_TABLE_ROW = /^\s*\S+\s+(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)\s+[\d.]+/;
+
       function parsePmCountsFromLine(line) {
-        const trimmed = line.trim();
-        if (!trimmed) {
+        const text = line.trim();
+        if (!text) return null;
+
+        // "After consolidation: 601 active PMs, 99 idle PMs, ..."
+        const pair = text.match(RE_PAIR);
+        if (pair) return { active: Number(pair[1]), idle: Number(pair[2]) };
+
+        // Header of a printed table: "... Active PMs  Idle PMs ..."
+        if (RE_TABLE_HEADER.test(text)) {
+          tableMode = true;
           return null;
         }
 
-        const explicitActiveMatch = trimmed.match(/\bactive\s*pms?\s*[:=]?\s*(\d+)/i);
-        const explicitIdleMatch = trimmed.match(/\bidle\s*pms?\s*[:=]?\s*(\d+)/i);
-
-        if (explicitActiveMatch || explicitIdleMatch) {
-          const active = explicitActiveMatch ? parseInt(explicitActiveMatch[1], 10) : null;
-          const idle = explicitIdleMatch ? parseInt(explicitIdleMatch[1], 10) : null;
-          if (active !== null || idle !== null) {
-            return { active, idle };
-          }
-        }
-
-        const hasHeaderWords = /active/i.test(trimmed) && /idle/i.test(trimmed) && /pms/i.test(trimmed);
-        if (hasHeaderWords) {
-          const tokens = trimmed.split(/\s+/);
-          const activeIndex = tokens.findIndex((token) => token.toLowerCase() === 'active');
-          const idleIndex = tokens.findIndex((token) => token.toLowerCase() === 'idle');
-          if (activeIndex !== -1 && idleIndex !== -1) {
-            lastHeaderActiveIndex = activeIndex;
-            lastHeaderIdleIndex = idleIndex;
-          }
-          return null;
-        }
-
-        if (lastHeaderActiveIndex !== null && lastHeaderIdleIndex !== null) {
-          const tokens = trimmed.split(/\s+/);
-          if (tokens.length > Math.max(lastHeaderActiveIndex, lastHeaderIdleIndex)) {
-            const activeValue = Number(tokens[lastHeaderActiveIndex]);
-            const idleValue = Number(tokens[lastHeaderIdleIndex]);
-            if (!Number.isNaN(activeValue) && !Number.isNaN(idleValue)) {
-              return { active: activeValue, idle: idleValue };
+        // Data row of that table: "<name> <active> <idle> <number> ..."
+        if (tableMode) {
+          const row = text.match(RE_TABLE_ROW);
+          if (row) {
+            const active = Number(row[1]);
+            const idle = Number(row[2]);
+            // Only accept rows that add up to the pool size (skips mean/std rows).
+            if (Math.abs(active + idle - totalPms) <= 1) {
+              return { active: Math.round(active), idle: Math.round(idle) };
             }
           }
         }
 
+        // "Active PMs: 601" and "Idle PMs: 99" on their own lines
+        const activeMatch = text.match(RE_ACTIVE);
+        const idleMatch = text.match(RE_IDLE);
+        if (activeMatch || idleMatch) {
+          return {
+            active: activeMatch ? Number(activeMatch[1]) : null,
+            idle: idleMatch ? Number(idleMatch[1]) : null
+          };
+        }
         return null;
       }
 
       function applyPmCountsFromLine(line) {
         const parsed = parsePmCountsFromLine(line);
-        if (!parsed) {
-          return;
-        }
-
+        if (!parsed) return;
         const active = parsed.active !== null ? parsed.active : totalPms - parsed.idle;
-        const idle = parsed.idle !== null ? parsed.idle : totalPms - active;
-        if (active >= 0 && idle >= 0) {
+        if (Number.isFinite(active) && active >= 0 && active <= totalPms) {
           updatePmGrid(active);
         }
       }
+      // --- PM parser end
 
+      /* ---------- terminal and run status ---------- */
       function appendTerminalLine(text, kind = '') {
         const line = document.createElement('div');
         line.className = `line ${kind}`.trim();
@@ -738,15 +858,17 @@
         terminal.scrollTop = terminal.scrollHeight;
       }
 
-      function clearTerminal() {
-        terminal.innerHTML = '';
+      function clearTerminal() { terminal.innerHTML = ''; }
+
+      function setStatus(text, kind = '') {
+        runStatus.textContent = text;
+        runStatus.className = `run-status ${kind}`.trim();
       }
 
       function setButtonsState(runningButton = null) {
         buttons.forEach((button) => {
-          const isRunning = button === runningButton;
           button.disabled = !!runningButton;
-          button.classList.toggle('is-running', isRunning);
+          button.classList.toggle('is-running', button === runningButton);
         });
       }
 
@@ -757,24 +879,237 @@
         }
       }
 
-      function formatCaption(filename) {
-        return filename
-          .replace(/\.png$/i, '')
-          .replace(/[_-]+/g, ' ')
-          .replace(/\s+/g, ' ')
-          .trim()
-          .replace(/\b\w/g, (char) => char.toUpperCase());
+      /* ---------- headline numbers ---------- */
+      function kpiCard(label, value, sub, accent) {
+        const card = document.createElement('div');
+        card.className = `kpi-card${accent ? ' accent' : ''}`;
+        const l = document.createElement('div');
+        l.className = 'kpi-label';
+        l.textContent = label;
+        const v = document.createElement('div');
+        v.className = 'kpi-value';
+        v.textContent = value;
+        const s = document.createElement('div');
+        s.className = 'kpi-sub';
+        s.textContent = sub;
+        card.appendChild(l);
+        card.appendChild(v);
+        card.appendChild(s);
+        return card;
       }
 
-      let galleryItems = [];
+      function renderKpis(data) {
+        kpiStrip.innerHTML = '';
+        const cons = data && data.consolidation;
+        if (!cons) {
+          const empty = document.createElement('div');
+          empty.className = 'kpi-empty';
+          empty.textContent = 'Run Full Comparison to fill in the headline numbers.';
+          kpiStrip.appendChild(empty);
+        } else {
+          kpiStrip.appendChild(kpiCard(
+            'Consolidation-only energy reduction',
+            `${fmtNumber(cons.reduction_pct, 2)}%`,
+            'same VMs, before vs. after consolidation (estimated)',
+            true
+          ));
+          kpiStrip.appendChild(kpiCard(
+            'Active PMs',
+            `${cons.before.active} \u2192 ${cons.after.active}`,
+            `${cons.after.idle} PMs idled`,
+            false
+          ));
+          kpiStrip.appendChild(kpiCard(
+            'Estimated energy',
+            `${fmtNumber(cons.before.energy, 0)} \u2192 ${fmtNumber(cons.after.energy, 0)} W`,
+            'SPECpower-based estimate',
+            false
+          ));
+        }
+        ((data && data.seed_stats) || []).forEach((stat) => {
+          kpiStrip.appendChild(kpiCard(
+            stat.label,
+            `${fmtNumber(stat.mean, 2)}% \u00b1 ${fmtNumber(stat.std, 2)}`,
+            `mean \u00b1 std over ${stat.n} seeds`,
+            false
+          ));
+        });
+      }
 
-      function openLightbox(index) {
-        if (!galleryItems.length || index < 0 || index >= galleryItems.length) {
+      async function loadSummary() {
+        try {
+          const response = await fetch('/summary');
+          renderKpis(await response.json());
+        } catch (error) {
+          renderKpis(null);
+        }
+      }
+
+      /* ---------- comparison panels ---------- */
+      function buildMiniGrid(active, idle) {
+        const total = Math.max((active || 0) + (idle || 0), 1);
+        const cellCount = 96;
+        const activeCells = Math.max(0, Math.min(cellCount, Math.round(((active || 0) / total) * cellCount)));
+        const miniGrid = document.createElement('div');
+        miniGrid.className = 'comparison-mini-grid';
+        for (let i = 0; i < cellCount; i += 1) {
+          const cell = document.createElement('div');
+          cell.className = `comparison-cell${i < activeCells ? ' active' : ''}`;
+          miniGrid.appendChild(cell);
+        }
+        return miniGrid;
+      }
+
+      function metricsCard(title, item, featured) {
+        const card = document.createElement('div');
+        card.className = `comparison-card${featured ? ' featured' : ''}`;
+        const heading = document.createElement('div');
+        heading.className = 'comparison-title';
+        heading.textContent = title;
+        card.appendChild(heading);
+        const readout = document.createElement('div');
+        readout.className = 'comparison-readout';
+        if (item && item.active !== null && item.idle !== null) {
+          readout.innerHTML = `Active: ${item.active} | Idle: ${item.idle}<br>Energy: ${fmtNumber(item.energy, 2)} W`;
+          card.appendChild(readout);
+          card.appendChild(buildMiniGrid(item.active, item.idle));
+        } else {
+          readout.textContent = 'No data available';
+          card.appendChild(readout);
+        }
+        return card;
+      }
+
+      function showComparisonMessage(message) {
+        comparisonMessage.textContent = message;
+        comparisonMessage.style.display = 'block';
+        comparisonGrid.innerHTML = '';
+        comparisonNote.textContent = '';
+      }
+
+      function renderComparison() {
+        comparisonGrid.innerHTML = '';
+        comparisonMessage.style.display = 'none';
+        comparisonNote.textContent = COMPARISON_NOTES[comparisonView];
+        comparisonTabs.querySelectorAll('.tab-btn').forEach((btn) => {
+          btn.classList.toggle('is-active', btn.dataset.view === comparisonView);
+        });
+
+        if (!comparisonData || comparisonData.error) {
+          showComparisonMessage('Run Full Comparison to see this comparison');
           return;
         }
 
+        if (comparisonView === 'placement') {
+          comparisonGrid.className = 'comparison-grid';
+          const placement = comparisonData.placement || {};
+          [
+            ['Ours (placement only)', 'our_algorithm', true],
+            ['Round Robin', 'round_robin', false],
+            ['First Fit', 'first_fit', false],
+            ['Best Fit', 'best_fit', false]
+          ].forEach(([label, key, featured]) => {
+            comparisonGrid.appendChild(metricsCard(label, placement[key], featured));
+          });
+        } else {
+          comparisonGrid.className = 'comparison-grid cols-3';
+          const cons = comparisonData.consolidation;
+          if (!cons) {
+            showComparisonMessage('Run Full Comparison to see this comparison');
+            return;
+          }
+          comparisonGrid.appendChild(metricsCard('Before consolidation', cons.before, false));
+          comparisonGrid.appendChild(metricsCard('After consolidation', cons.after, true));
+
+          const change = document.createElement('div');
+          change.className = 'comparison-card';
+          const heading = document.createElement('div');
+          heading.className = 'comparison-title';
+          heading.textContent = 'Change';
+          const big = document.createElement('div');
+          big.className = 'comparison-big';
+          big.textContent = `\u2212${fmtNumber(cons.reduction_pct, 2)}%`;
+          const detail = document.createElement('div');
+          detail.className = 'comparison-readout';
+          const idled = (cons.after.idle || 0) - (cons.before.idle || 0);
+          detail.innerHTML = `estimated energy<br>${idled} more PMs idle`;
+          change.appendChild(heading);
+          change.appendChild(big);
+          change.appendChild(detail);
+          comparisonGrid.appendChild(change);
+        }
+      }
+
+      async function loadComparisonData(showEmptyMessage) {
+        try {
+          const response = await fetch('/comparison-data');
+          comparisonData = await response.json();
+        } catch (error) {
+          comparisonData = { error: 'unavailable' };
+        }
+        if (comparisonData.error && !showEmptyMessage) return;
+        comparisonSection.classList.add('is-visible');
+        renderComparison();
+      }
+
+      /* ---------- result tables ---------- */
+      function renderTable(payload) {
+        tableWrap.innerHTML = '';
+        if (!payload || payload.error) {
+          const empty = document.createElement('div');
+          empty.className = 'empty-state';
+          empty.textContent = (payload && payload.error) || 'Unable to load this table.';
+          tableWrap.appendChild(empty);
+          return;
+        }
+        const table = document.createElement('table');
+        table.className = 'data-table';
+        const head = document.createElement('thead');
+        const headRow = document.createElement('tr');
+        payload.columns.forEach((name) => {
+          const th = document.createElement('th');
+          th.textContent = name;
+          headRow.appendChild(th);
+        });
+        head.appendChild(headRow);
+        table.appendChild(head);
+        const body = document.createElement('tbody');
+        payload.rows.forEach((row) => {
+          const tr = document.createElement('tr');
+          payload.columns.forEach((_, index) => {
+            const td = document.createElement('td');
+            td.textContent = formatCell(row[index] === undefined ? '' : row[index]);
+            tr.appendChild(td);
+          });
+          body.appendChild(tr);
+        });
+        table.appendChild(body);
+        tableWrap.appendChild(table);
+      }
+
+      async function loadTable(name) {
+        currentTable = name;
+        tableTabs.querySelectorAll('.tab-btn').forEach((btn) => {
+          btn.classList.toggle('is-active', btn.dataset.table === name);
+        });
+        tableNote.textContent = TABLE_NOTES[name] || '';
+        try {
+          const response = await fetch(`/table/${encodeURIComponent(name)}`);
+          renderTable(await response.json());
+        } catch (error) {
+          renderTable({ error: 'Unable to load this table.' });
+        }
+      }
+
+      /* ---------- gallery and lightbox ---------- */
+      function imageUrl(filename) {
+        return `/results/${encodeURIComponent(filename)}?v=${imageVersion}`;
+      }
+
+      function openLightbox(index) {
+        if (!galleryItems.length || index < 0 || index >= galleryItems.length) return;
         const filename = galleryItems[index];
-        lightboxImage.src = `/results/${encodeURIComponent(filename)}`;
+        lightboxImage.src = imageUrl(filename);
         lightboxImage.alt = filename;
         lightboxCaption.textContent = formatCaption(filename);
         lightbox.dataset.currentIndex = String(index);
@@ -794,36 +1129,25 @@
       function showAdjacentImage(direction) {
         const currentIndex = Number(lightbox.dataset.currentIndex || '0');
         const nextIndex = currentIndex + direction;
-        if (nextIndex < 0 || nextIndex >= galleryItems.length) {
-          return;
-        }
+        if (nextIndex < 0 || nextIndex >= galleryItems.length) return;
         openLightbox(nextIndex);
       }
 
       function renderGallery(items) {
-        galleryItems = items;
         gallery.innerHTML = '';
-        if (!galleryItems.length) {
+        if (!items.length) {
+          galleryItems = [];
           gallery.innerHTML = '<div class="empty-state">No PNG results available yet.</div>';
           return;
         }
 
         const preferred = [
-          'cluster_profile',
-          'cluster_sizes',
-          'autoencoder_training',
-          'confusion_matrix',
-          'experiment1_active_pms',
-          'experiment1_energy',
-          'experiment2_active_pms',
-          'experiment2_energy',
-          'multiseed_energy_reduction',
-          'sensitivity_heatmap',
-          'kmeans_k_selection',
-          'kmeans_silhouette'
+          'cluster_profile', 'cluster_sizes', 'autoencoder_training', 'confusion_matrix',
+          'experiment1_active_pms', 'experiment1_energy', 'experiment2_active_pms', 'experiment2_energy',
+          'multiseed_energy_reduction', 'sensitivity_heatmap', 'kmeans_k_selection', 'kmeans_silhouette'
         ];
 
-        const sortedItems = [...galleryItems].sort((a, b) => {
+        galleryItems = [...items].sort((a, b) => {
           const aIndex = preferred.findIndex((token) => a.toLowerCase().includes(token));
           const bIndex = preferred.findIndex((token) => b.toLowerCase().includes(token));
           if (aIndex === -1 && bIndex === -1) return a.localeCompare(b);
@@ -832,16 +1156,13 @@
           return aIndex - bIndex;
         });
 
-        galleryItems = sortedItems;
-
-        sortedItems.forEach((filename, index) => {
+        galleryItems.forEach((filename, index) => {
           const card = document.createElement('div');
           card.className = 'gallery-item';
-          const staggerDelay = Math.min(index * 40, 800);
-          card.style.animationDelay = `${staggerDelay}ms`;
+          card.style.animationDelay = `${Math.min(index * 40, 800)}ms`;
 
           const img = document.createElement('img');
-          img.src = `/results/${encodeURIComponent(filename)}`;
+          img.src = imageUrl(filename);
           img.alt = filename;
           img.addEventListener('click', () => openLightbox(index));
 
@@ -856,182 +1177,120 @@
       }
 
       async function loadResults() {
+        imageVersion = Date.now();
         try {
           const response = await fetch('/results-list');
-          const items = await response.json();
-          renderGallery(items);
+          renderGallery(await response.json());
         } catch (error) {
           gallery.innerHTML = '<div class="empty-state">Unable to load results.</div>';
         }
       }
 
-      function showComparisonMessage(message) {
-        comparisonMessage.textContent = message;
-        comparisonMessage.style.display = 'block';
-        comparisonGrid.innerHTML = '';
-        comparisonSection.style.display = 'block';
-        comparisonSection.style.visibility = 'visible';
-        comparisonSection.style.opacity = '1';
-        comparisonSection.classList.add('is-visible');
+      function refreshAll() {
+        loadResults();
+        loadSummary();
+        loadComparisonData(false);
+        loadTable(currentTable);
       }
 
-      function renderComparison(data) {
-        if (data && data.error) {
-          showComparisonMessage('Run Full Comparison to see this comparison');
-          return;
-        }
-
-        comparisonMessage.style.display = 'none';
-        comparisonGrid.innerHTML = '';
-        comparisonSection.style.display = 'block';
-        comparisonSection.style.visibility = 'visible';
-        comparisonSection.style.opacity = '1';
-        comparisonSection.classList.add('is-visible');
-
-        const definitions = [
-          { key: 'our_algorithm', label: 'Our Algorithm', featured: true },
-          { key: 'round_robin', label: 'Round Robin', featured: false },
-          { key: 'first_fit', label: 'First Fit', featured: false },
-          { key: 'best_fit', label: 'Best Fit', featured: false }
-        ];
-
-        definitions.forEach((definition) => {
-          const item = data ? data[definition.key] : null;
-          const card = document.createElement('div');
-          card.className = `comparison-card${definition.featured ? ' featured' : ''}`;
-
-          const title = document.createElement('div');
-          title.className = 'comparison-title';
-          title.textContent = definition.label;
-
-          const readout = document.createElement('div');
-          readout.className = 'comparison-readout';
-          if (item) {
-            const total = item.active + item.idle;
-            readout.innerHTML = `Active: ${item.active} | Idle: ${item.idle}<br>Energy: ${Number(item.energy).toLocaleString(undefined, { maximumFractionDigits: 2 })} W`;
-            const miniGrid = document.createElement('div');
-            miniGrid.className = 'comparison-mini-grid';
-            const cellCount = 60;
-            const activeCells = Math.max(0, Math.min(cellCount, Math.round((item.active / Math.max(total, 1)) * cellCount)));
-            for (let i = 0; i < cellCount; i += 1) {
-              const cell = document.createElement('div');
-              cell.className = `comparison-cell${i < activeCells ? ' active' : ''}`;
-              miniGrid.appendChild(cell);
-            }
-            card.appendChild(title);
-            card.appendChild(readout);
-            card.appendChild(miniGrid);
-          } else {
-            readout.textContent = 'No data available';
-            card.appendChild(title);
-            card.appendChild(readout);
-          }
-
-          comparisonGrid.appendChild(card);
-        });
-      }
-
-      async function loadComparisonData() {
-        try {
-          const response = await fetch('/comparison-data');
-          const data = await response.json();
-          renderComparison(data);
-        } catch (error) {
-          showComparisonMessage('Run Full Comparison to see this comparison');
-        }
-      }
-
+      /* ---------- running a script ---------- */
       function startRun(scriptName, button) {
+        const confirmText = button.dataset.confirm;
+        if (confirmText && !window.confirm(confirmText)) return;
+
+        const label = SCRIPT_LABELS[scriptName] || scriptName;
         clearTerminal();
-        appendTerminalLine(`Starting ${scriptName}...`, 'warn');
+        appendTerminalLine(`Starting ${label}...`, 'warn');
         stopCurrentRun();
         setButtonsState(button);
-        activeRunButton = button;
-        if (scriptName === 'full_comparison') {
-          comparisonSection.style.display = 'block';
-          comparisonSection.style.visibility = 'visible';
-          comparisonSection.style.opacity = '1';
-          comparisonSection.classList.add('is-visible');
-          comparisonMessage.textContent = 'Loading comparison data...';
-          comparisonMessage.style.display = 'block';
-          comparisonGrid.innerHTML = '';
-        }
-        lastHeaderActiveIndex = null;
-        lastHeaderIdleIndex = null;
+        tableMode = false;
+
+        const startedAt = Date.now();
+        let sawError = false;
+        let finished = false;
+        setStatus(`Running ${label} - 0s`, 'running');
+        const timer = window.setInterval(() => {
+          setStatus(`Running ${label} - ${Math.round((Date.now() - startedAt) / 1000)}s`, 'running');
+        }, 1000);
+
+        const finish = (kind, message) => {
+          if (finished) return;
+          finished = true;
+          window.clearInterval(timer);
+          if (currentEventSource) {
+            currentEventSource.close();
+            currentEventSource = null;
+          }
+          setButtonsState();
+          const seconds = Math.round((Date.now() - startedAt) / 1000);
+          setStatus(`${message} - ${seconds}s`, kind);
+          refreshAll();
+        };
 
         currentEventSource = new EventSource(`/run/${scriptName}`);
-        let finished = false;
 
         currentEventSource.onmessage = (event) => {
           const data = event.data;
-
           if (data === '[DONE]') {
-            if (!finished) {
-              finished = true;
+            if (sawError) {
+              appendTerminalLine('Run finished with errors.', 'error');
+              finish('failed', 'Failed');
+            } else {
               appendTerminalLine('Run complete.', 'success');
-              if (scriptName === 'full_comparison') {
-                loadComparisonData();
-              }
-              currentEventSource.close();
-              currentEventSource = null;
-              setButtonsState();
-              activeRunButton = null;
+              finish('done', 'Finished');
             }
             return;
           }
-
           if (data.startsWith('[ERROR]')) {
+            sawError = true;
             appendTerminalLine(data, 'error');
           } else {
             appendTerminalLine(data);
           }
-
           applyPmCountsFromLine(data);
         };
 
         currentEventSource.onerror = () => {
           if (!finished) {
-            finished = true;
             appendTerminalLine('Stream disconnected or script failed.', 'error');
-            currentEventSource.close();
-            currentEventSource = null;
-            setButtonsState();
-            activeRunButton = null;
+            finish('failed', 'Disconnected');
           }
         };
       }
 
       buttons.forEach((button) => {
-        button.addEventListener('click', () => {
-          const scriptName = button.dataset.script;
-          startRun(scriptName, button);
-        });
+        button.addEventListener('click', () => startRun(button.dataset.script, button));
+      });
+
+      comparisonTabs.addEventListener('click', (event) => {
+        const btn = event.target.closest('.tab-btn');
+        if (!btn) return;
+        comparisonView = btn.dataset.view;
+        renderComparison();
+      });
+
+      tableTabs.addEventListener('click', (event) => {
+        const btn = event.target.closest('.tab-btn');
+        if (!btn) return;
+        loadTable(btn.dataset.table);
       });
 
       lightboxClose.addEventListener('click', closeLightbox);
       lightboxPrev.addEventListener('click', () => showAdjacentImage(-1));
       lightboxNext.addEventListener('click', () => showAdjacentImage(1));
       lightbox.addEventListener('click', (event) => {
-        if (event.target === lightbox) {
-          closeLightbox();
-        }
+        if (event.target === lightbox) closeLightbox();
       });
 
       document.addEventListener('keydown', (event) => {
-        if (!lightbox.classList.contains('is-open')) {
-          return;
-        }
-        if (event.key === 'Escape') {
-          closeLightbox();
-        } else if (event.key === 'ArrowLeft') {
-          showAdjacentImage(-1);
-        } else if (event.key === 'ArrowRight') {
-          showAdjacentImage(1);
-        }
+        if (!lightbox.classList.contains('is-open')) return;
+        if (event.key === 'Escape') closeLightbox();
+        else if (event.key === 'ArrowLeft') showAdjacentImage(-1);
+        else if (event.key === 'ArrowRight') showAdjacentImage(1);
       });
 
       createPmGrid();
-      loadResults();
+      refreshAll();
     </script>
   </body>
 </html>
